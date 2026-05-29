@@ -1,0 +1,59 @@
+name: Deploy Doctor Patient AI Transcript
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  AWS_REGION: ap-south-1
+  EKS_CLUSTER_NAME: Pulse-cluster
+  ECR_REPOSITORY: doctor-patient-ai-transcript
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build not  Image
+        run: |
+          docker build -t $ECR_REPOSITORY .
+
+      - name: Tag Docker Image
+        run: |
+          docker tag $ECR_REPOSITORY:latest 114403655685.dkr.ecr.ap-south-1.amazonaws.com/$ECR_REPOSITORY:latest
+
+      - name: Push Docker Image
+        run: |
+          docker push 114403655685.dkr.ecr.ap-south-1.amazonaws.com/$ECR_REPOSITORY:latest
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name Pulse-cluster --region ap-south-1
+
+      - name: Deploy to EKS
+        run: |
+          kubectl apply -f .k8s/qa/namespace.yaml
+          kubectl apply -f .k8s/qa/secret.yaml
+          kubectl apply -f .k8s/qa/deployment.yaml
+          kubectl apply -f .k8s/qa/service.yaml
+
+      - name: Verify Deployment
+        run: |
+          kubectl get pods -n qa
+          kubectl get svc -n qa

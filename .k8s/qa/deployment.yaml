@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: doctor-patient-ai-transcript
+  namespace: qa
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: doctor-patient-ai-transcript
+
+  template:
+    metadata:
+      labels:
+        app: doctor-patient-ai-transcript
+
+    spec:
+      containers:
+        - name: doctor-patient-ai-transcript
+
+          image: 114403655685.dkr.ecr.ap-south-1.amazonaws.com/doctor-patient-ai-transcript:latest
+
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 8000
+
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: doctor-patient-ai-transcript
+                  key: OPENAI_API_KEY
+
+            - name: LIVEKIT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: doctor-patient-ai-transcript
+                  key: LIVEKIT_API_KEY
+
+            - name: LIVEKIT_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: doctor-patient-ai-transcript
+                  key: LIVEKIT_API_SECRET
+
+            - name: LIVEKIT_URL
+              valueFrom:
+                secretKeyRef:
+                  name: doctor-patient-ai-transcript
+                  key: LIVEKIT_URL

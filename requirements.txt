@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+httpx
+numpy
+PyJWT
+scikit-learn
+deep-translator
+python-multipart
+websockets
+pydantic
+webrtcvad-wheels
+imageio-ffmpeg
+python-dotenv
